@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Certificate Download System - Team Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    :root {
+      --bg-light: #f8fafc;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --accent-teal: #0d9488;
+      --accent-indigo: #4f46e5;
+      --text-main: #0f172a;
+      --text-sub: #64748b;
+    }
+    body {
+      font-family: 'Prompt', sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+    .site-header {
+      background: linear-gradient(135deg, #0f766e 0%, #0f172a 100%);
+      border-bottom: 1px solid var(--card-border);
+      padding: 2.5rem 1.5rem;
+      position: relative;
+      color: #ffffff;
+    }
+    .lang-btn {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      padding: 5px 15px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .search-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.25rem;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+      margin-top: -2rem;
+      position: relative;
+      z-index: 10;
+    }
+    .form-control-custom, .form-select-custom {
+      background-color: #ffffff !important;
+      border: 1.5px solid var(--card-border) !important;
+      color: var(--text-main) !important;
+      border-radius: 12px !important;
+      padding: 0.75rem 1rem !important;
+    }
+    .comp-section {
+      background: #ffffff;
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 1.25rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+    }
+    .comp-header-bar {
+      background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+      color: #ffffff;
+      padding: 0.9rem 1.25rem;
+      border-radius: 14px;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 4px 14px rgba(13, 148, 136, 0.22);
+    }
+    .comp-header-bar .comp-icon-badge {
+      background: rgba(255, 255, 255, 0.2);
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+    }
+    .team-card {
+      background: #f8fafc;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.25rem 1.25rem 0.5rem 1.25rem;
+      margin-bottom: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .team-id-badge {
+      background-color: #e2e8f0;
+      border: 1px solid #cbd5e1;
+      padding: 3px 10px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.78rem;
+    }
+    .rank-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    .rank-1 { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .rank-2 { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .rank-3 { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+    .toggle-bar-btn {
+      width: 100%;
+      background: #f1f5f9;
+      border: none;
+      border-top: 1px solid var(--card-border);
+      color: var(--accent-teal);
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 6px 0;
+      margin-top: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.2s;
+      border-radius: 0 0 12px 12px;
+    }
+    .toggle-bar-btn:hover { background: #e2e8f0; }
+    
+    .score-container { display: flex; gap: 10px; align-items: center; }
+    .score-pill {
+      background: #ffffff;
+      border: 1.5px solid var(--card-border);
+      border-radius: 12px;
+      padding: 8px 16px;
+      display: flex; flex-direction: column; align-items: center;
+      min-width: 85px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    }
+    .score-label { font-size: 0.78rem; color: var(--text-sub); font-weight: 700; margin-bottom: 2px; }
+    .score-val { font-size: 1.25rem; font-weight: 800; color: var(--accent-teal); line-height: 1.1; }
+    
+    .btn-download-zip {
+      background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+      color: #ffffff !important;
+      border: none;
+      font-weight: 700;
+      font-size: 0.78rem;
+      padding: 7px 14px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(13, 148, 136, 0.3);
+      transition: all 0.2s ease-in-out;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-download-zip:hover {
+      background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
+      box-shadow: 0 5px 14px rgba(13, 148, 136, 0.45);
+      transform: translateY(-1px);
+    }
+    .btn-download-zip:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(13, 148, 136, 0.2);
+    }
+    .member-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+      margin-top: 1rem;
+      padding-bottom: 1rem;
+    }
+    .member-card {
+      background: #ffffff;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1rem;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .coach-card { background: #f5f3ff !important; border-color: #ddd6fe !important; }
+    .member-role-label { font-size: 0.75rem; font-weight: 700; color: var(--accent-teal); }
+    .coach-role-label {
+      font-size: 0.73rem; font-weight: 800; color: var(--accent-indigo);
+      background-color: #e0e7ff; border: 1px solid #c7d2fe;
+      padding: 2px 8px; border-radius: 6px; display: inline-block;
+    }
+    .member-name { font-size: 1rem; font-weight: 700; color: var(--text-main); margin: 6px 0 10px; }
+    .cert-btn-item {
+      background: #f8fafc; border: 1px solid var(--card-border);
+      color: #334155; padding: 7px 12px; border-radius: 8px;
+      font-size: 0.82rem; font-weight: 500; width: 100%; text-align: left;
+      margin-bottom: 6px; transition: all 0.2s;
+    }
+    .cert-btn-item:hover { background: #f1f5f9; border-color: var(--accent-teal); color: var(--accent-teal); }
+    .cert-btn-top { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+    .cert-id-badge {
+      display: inline-block; font-size: 0.7rem; font-family: monospace; font-weight: 700;
+      color: #0f766e; background-color: #ccfbf1; border: 1px solid #99f6e4;
+      padding: 2px 6px; border-radius: 4px; margin-top: 4px;
+    }
+    .cert-id-pending {
+      display: inline-block; font-size: 0.68rem; color: var(--text-sub);
+      background-color: #f1f5f9; border: 1px dashed var(--card-border);
+      padding: 1px 6px; border-radius: 4px; margin-top: 4px;
+    }
+    .cert-preview-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(4px);
+      z-index: 2000; overflow-y: auto; padding: 60px 16px 100px 16px;
+      align-items: flex-start; justify-content: center;
+    }
+    .zoom-bar {
+      position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
+      background: rgba(255,255,255,0.95); border-radius: 999px;
+      padding: 8px 20px; display: flex; align-items: center; gap: 12px;
+      z-index: 2100; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border: 1px solid var(--card-border);
+    }
+    .zoom-icon { font-size: 0.85rem; color: var(--text-sub); font-weight: 700; }
+    .zoom-bar input[type=range] { accent-color: var(--accent-teal); cursor: pointer; }
+    .cert-frame-wrap { position: relative; width: 1200px; transform-origin: top center; }
+    .cert-frame-img { width: 1200px; height: auto; display: block; border-radius: 6px; }
+    .cert-overlay-name, .cert-overlay-id { position: absolute; pointer-events: none; }
+    
+    /* สไตล์ชื่อภาษาไทย-อังกฤษ แสดงผลเต็มและย่อขนาดอัตโนมัติ */
+    /* กรอบข้อความแสดงขอบเขตชั่วคราว */
+.cert-overlay-name {
+  position: absolute;
+  left: 58%;                    /* ปรับ ซ้าย-ขวา ทั้งกรอบ */
+  bottom: 68%;                  /* ปรับ ขึ้น-ลง ทั้งกรอบ */
+  transform: translateX(-50%);  /* จัดกึ่งกลางพิกัด */
+  width: 90%;                   /* ปรับความกว้างกรอบ */
+  max-width: 70%;
+  height: 90px;                 /* ความสูงกรอบชั่วคราว */
+  text-align: center;
+  font-weight: 700;
+  color: #0f766e;
+  text-shadow: 0 0 6px rgba(255,255,255,0.9);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+    .cert-overlay-id {
+      font-weight: 700; color: #1e3530; background: #fff;
+      padding: 4px 12px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    
+    .preview-actions-inline {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(8px);
+      padding: 14px;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      width: 100%;
+      z-index: 2200;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+    }
+    #v1HiddenRenderBox { position: absolute; left: -9999px; top: -9999px; background: white; }
+  </style>
+</head>
+<body>
+  <header class="site-header text-center">
+    <button class="lang-btn" onclick="toggleLanguage()" id="langBtn">EN</button>
+    <div class="max-w-3xl mx-auto">
+      <span class="badge bg-white/20 text-white border border-white/30 mb-2 px-3 py-1 rounded-full text-xs">
+        🏆 Gammaco Robotics Competition
+      </span>
+      <h1 class="font-bold text-2xl sm:text-4xl text-white mb-1" id="mainTitle">ดาวน์โหลดใบประกาศนียบัตร</h1>
+      <p class="text-slate-200 text-sm opacity-90 mb-1">Team Certificate Download Portal</p>
+      <h1 class="font-bold text-2xl sm:text-4xl text-white mt-2" id="eventTitleDisplay">
+        GLOBAL ROBOTICS GAMES 2026 (GRG 2026)
+      </h1>
+    </div>
+  </header>
+  
+  <main class="max-w-6xl mx-auto px-4">
+    <div class="search-card mb-5">
+      <div class="row g-3 justify-content-center">
+        <div class="col-md-8">
+          <label class="form-label text-xs text-slate-500 font-bold" id="teamSearchLabel">เลือก / ค้นหา Team ID</label>
+          <select id="teamIdSelect" class="form-select form-select-custom" onchange="filterByTeamId()">
+            <option value="">— เลือก Team ID —</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div id="tablesMainContainer"></div>
+  </main>
+  
+  <div id="v1ImageModal" class="cert-preview-overlay" onclick="closeV1Preview()">
+    <div class="zoom-bar" onclick="event.stopPropagation()">
+      <span class="zoom-icon">🔍</span>
+      <input type="range" id="zoomSlider" min="0.2" max="1.2" step="0.05" value="0.5" oninput="updateImageZoom(this.value)">
+      <span class="zoom-icon" id="zoomPct">50%</span>
+    </div>
+    <div class="d-flex flex-column align-items-center w-100" onclick="event.stopPropagation()">
+      <div class="cert-frame-wrap" id="v1ModalContent">
+        <img id="v1ModalImage" class="cert-frame-img" src="" alt="Certificate">
+        <div id="v1NameText" class="cert-overlay-name"></div>
+        <div id="v1IdText" class="cert-overlay-id"></div>
+      </div>
+      <div class="preview-actions-inline">
+        <button class="btn text-white font-bold px-4 py-2 rounded-xl" style="background-color: #0d9488;" onclick="triggerPDFCompileV1()" id="btnDownloadPdf">
+          📥 ดาวน์โหลดใบประกาศนียบัตร (PDF)
+        </button>
+        <button class="btn btn-outline-secondary text-white px-4 py-2 rounded-xl" onclick="closeV1Preview()" id="btnClosePreview">
+          ปิดหน้าต่าง
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <div id="v1HiddenRenderBox"></div>
+  <footer class="fixed-bottom bg-white/90 backdrop-blur border-t border-slate-200 py-2 px-4 d-flex justify-content-between text-xs text-slate-500 shadow-sm">
+    <div>Gammaco (Thailand) Co.,LTD.</div>
+    <div>v <span id="srvVersion">...</span></div>
+  </footer>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxDj_Edmz4fRLlX_2rqGNuH6Ayz57aw-KoGxA0yukAypaZH-jsv6aOwLl2nJRw2A1u-Og/exec";
+    
+    const CERT_CONFIG = {
+      name:   { bottomOffset: "68%", leftOffset: "58%", baseSize: 70 },
+      certId: { bottomOffset: "1.4%", leftOffset: "77.2%", baseSize: 22 }
+    };
+    const LOADING_GIF_URL = "https://assets-v2.lottiefiles.com/a/91cc0ece-1150-11ee-b7cb-d3afb5c0c001/QNF78Uk4YE.gif";
+    let allEventsRaw = [];
+    let currentLoadedTablesData = [];
+    let activeMemberContext = null;
+    let globalActiveBase64 = "";
+    let currentLang = "th";
+    const T = {
+      th: {
+        title: "ดาวน์โหลดใบประกาศนียบัตร",
+        teamSearchLabel: "เลือก / ค้นหา Team ID",
+        teamSelectDefault: "— รายชื่อทั้งหมด —",
+        loadingTitle: "กำลังโหลดข้อมูล...",
+        loadingText: "กรุณารอสักครู่ ระบบกำลังจัดเตรียมข้อมูล",
+        btnDownloadPdf: "📥 ดาวน์โหลดใบประกาศนียบัตร (PDF)",
+        btnClosePreview: "ปิดหน้าต่าง",
+        hideMembersText: "ซ่อนรายชื่อสมาชิก ▲",
+        showMembersText: "แสดงรายชื่อสมาชิก ▼",
+        certTypes: {
+          rank1: "รางวัลชนะเลิศ", rank2: "รองชนะเลิศอันดับ 1", rank3: "รองชนะเลิศอันดับ 2",
+          medalGold: "เหรียญทอง", medalSilver: "เหรียญเงิน", medalBronze: "เหรียญทองแดง",
+          join: "เกียรติบัตรเข้าร่วม"
+        }
+      },
+      en: {
+        title: "Download Certificate",
+        teamSearchLabel: "Select / Filter Team ID",
+        teamSelectDefault: "— All Teams —",
+        loadingTitle: "Loading Data...",
+        loadingText: "Please wait while we prepare the system",
+        btnDownloadPdf: "📥 Download Certificate (PDF)",
+        btnClosePreview: "Close",
+        hideMembersText: "Hide Members ▲",
+        showMembersText: "Show Members ▼",
+        certTypes: {
+          rank1: "Winner", rank2: "1st Runner-up", rank3: "2nd Runner-up",
+          medalGold: "Gold Medal", medalSilver: "Silver Medal", medalBronze: "Bronze Medal",
+          join: "Certificate of Participation"
+        }
+      }
+    };
+    function t(key) { return T[currentLang][key] ?? key; }
+    function tc(key) { return T[currentLang].certTypes[key] ?? key; }
+    function showLoadingAlert(customTitle, customText) {
+      Swal.fire({
+        title: customTitle || t('loadingTitle'),
+        text: customText || t('loadingText'),
+        imageUrl: LOADING_GIF_URL,
+        imageWidth: 140,
+        imageHeight: 140,
+        imageAlt: 'Loading Animation',
+        showConfirmButton: false,
+        allowOutsideClick: false
+      });
+    }
+    
+    // ฟังก์ชันย่อขนาดฟอนต์อัตโนมัติ ไม่ตัดคำออก
+    function calcFontSize(text, base, threshold = 20) {
+      if (!text) return base;
+      const len = text.length;
+      if (len <= threshold) return base;
+      const scale = threshold / len;
+      return Math.max(base * scale, base * 0.35); // ปรับย่อขนาดได้ยืดหยุ่นไม่เกิน 35% ของฟอนต์เดิม
+    }
+    
+    function updateImageZoom(val) {
+      document.getElementById('v1ModalContent').style.transform = `scale(${val})`;
+      document.getElementById('zoomPct').textContent = Math.round(val * 100) + '%';
+    }
+    function toggleMemberGrid(containerId, btn) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      if (container.style.display === 'none' || container.style.display === '') {
+        container.style.display = 'block';
+        btn.innerHTML = `<span>${t('hideMembersText')}</span>`;
+      } else {
+        container.style.display = 'none';
+        btn.innerHTML = `<span>${t('showMembersText')}</span>`;
+      }
+    }
+    
+    async function callServer(action, payload = {}) {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        return new Promise((res, rej) => {
+          google.script.run
+            .withSuccessHandler(r => res(r))
+            .withFailureHandler(e => rej(e))
+            .runServerAction(action, payload);
+        });
+      }
+      
+      const resp = await fetch(WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({ action, payload }),
+        headers: { "Content-Type": "text/plain;charset=utf-8" }
+      });
+      const json = await resp.json();
+      if (json.success) return json.data;
+      throw new Error(json.error);
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      showLoadingAlert('กำลังเข้าสู่ระบบ...', 'กำลังดึงรายการข้อมูลการแข่งขันล่าสุด');
+      try {
+        const vRes = await callServer('getVersion');
+        document.getElementById('srvVersion').innerText = vRes.version;
+        allEventsRaw = await callServer('getEvents');
+        applyLangDOM();
+        
+        if (allEventsRaw && allEventsRaw.length > 0) {
+          document.getElementById('eventTitleDisplay').innerText = allEventsRaw[0].eventName || 'GLOBAL ROBOTICS GAMES 2026';
+          
+          currentLoadedTablesData = await callServer('getMultipleTeams', { compsList: allEventsRaw });
+          let allTeamsList = [];
+          currentLoadedTablesData.forEach(table => {
+            table.teams.forEach(tm => {
+              allTeamsList.push({ teamId: tm.teamId, teamName: tm.teamName });
+            });
+          });
+          populateTeamIdDropdown(allTeamsList);
+          renderDashboardView(currentLoadedTablesData);
+        }
+        Swal.close();
+      } catch (e) { 
+        console.error(e);
+        Swal.fire('Error', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', 'error');
+      }
+    });
+
+    function toggleLanguage() {
+      currentLang = currentLang === "th" ? "en" : "th";
+      document.getElementById('langBtn').innerText = currentLang === "th" ? "EN" : "TH";
+      applyLangDOM();
+    }
+
+    function applyLangDOM() {
+      document.getElementById('mainTitle').innerText = t('title');
+      document.getElementById('teamSearchLabel').innerText = t('teamSearchLabel');
+      document.getElementById('btnDownloadPdf').innerText = t('btnDownloadPdf');
+      document.getElementById('btnClosePreview').innerText = t('btnClosePreview');
+    }
+
+    function populateTeamIdDropdown(teamsList) {
+      const teamSel = document.getElementById('teamIdSelect');
+      teamSel.innerHTML = `<option value="">${t('teamSelectDefault')}</option>`;
+      teamsList.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item.teamId;
+        opt.innerText = `[${item.teamId}] - ${item.teamName}`;
+        teamSel.appendChild(opt);
+      });
+    }
+
+    function filterByTeamId() {
+      const selectedTeamId = document.getElementById('teamIdSelect').value.trim();
+      if (!selectedTeamId) {
+        renderDashboardView(currentLoadedTablesData);
+        return;
+      }
+      const filtered = currentLoadedTablesData.map(table => {
+        return {
+          ...table,
+          teams: table.teams.filter(t => t.teamId.toString().trim() === selectedTeamId)
+        };
+      });
+      renderDashboardView(filtered);
+    }
+
+    async function renderDashboardView(tablesData) {
+      const container = document.getElementById('tablesMainContainer');
+      container.innerHTML = '';
+      for (const tableData of tablesData) {
+        if (!tableData.teams.length) continue;
+        const issuedCerts = tableData.issuedCerts || {};
+        const compSection = document.createElement('div');
+        compSection.className = 'comp-section';
+        compSection.innerHTML = `
+          <div class="comp-header-bar">
+            <div class="comp-icon-badge">🤖</div>
+            <h2 class="comp-title-text">${tableData.competitionName}</h2>
+          </div>
+        `;
+        const createCertBtn = (titleIcon, roleKey, personName, teamId, imageUrl, certType) => {
+          if (!imageUrl || imageUrl.trim() === '' || imageUrl === '-') return '';
+          
+          const key = `${teamId.toString().trim()}_${personName.toString().trim()}_${certType}`;
+          const existingId = issuedCerts[key];
+          const badgeHTML = existingId 
+            ? `<span class="cert-id-badge">[ID: ${existingId}]</span>`
+            : `<span class="cert-id-pending">[สร้างรหัสเมื่อดาวน์โหลด]</span>`;
+          return `
+            <button class="cert-btn-item" onclick="prepareAndPreview('${roleKey}','${personName}','${teamId}','${imageUrl}','${certType}', this)">
+              <div class="cert-btn-top">
+                <span>${titleIcon}</span>
+                <span>›</span>
+              </div>
+              ${badgeHTML}
+            </button>
+          `;
+        };
+        for (const team of tableData.teams) {
+          const rankNum = parseInt(team.rank);
+          const rankClass = rankNum === 1 ? 'rank-1' : rankNum === 2 ? 'rank-2' : rankNum === 3 ? 'rank-3' : 'bg-slate-100 text-slate-600';
+          const teamCard = document.createElement('div');
+          teamCard.className = 'team-card';
+          const sLabel1 = tableData.scoreLabels?.label1 || 'รอบ 1';
+          const sLabel2 = tableData.scoreLabels?.label2 || 'รอบ 2';
+          const sLabel3 = tableData.scoreLabels?.label3 || 'รอบ 3';
+          const memberContainerId = `member-container-${team.teamId.toString().replace(/[^a-zA-Z0-9]/g, '')}`;
+          const details = team.details || { 
+            coach: '-', coachBlocked: '',
+            member1: '-', m1Blocked: '',
+            member2: '-', m2Blocked: '',
+            member3: '-', m3Blocked: ''
+          };
+          const roles = [
+            { label: 'ผู้ควบคุมทีม', name: details.coach, roleKey: 'coach', blockedCerts: details.coachBlocked || '' },
+            { label: 'สมาชิกคนที่ 1', name: details.member1, roleKey: 'member1', blockedCerts: details.m1Blocked || '' },
+            { label: 'สมาชิกคนที่ 2', name: details.member2, roleKey: 'member2', blockedCerts: details.m2Blocked || '' },
+            { label: 'สมาชิกคนที่ 3', name: details.member3, roleKey: 'member3', blockedCerts: details.m3Blocked || '' }
+          ];
+          let gridCardsHTML = '';
+          roles.forEach(r => {
+            if (!r.name || r.name === '-' || r.name.trim() === '') return;
+            const isCoach = r.roleKey === 'coach';
+            const cardClass = isCoach ? 'member-card coach-card' : 'member-card';
+            
+            const blocked = (r.blockedCerts || '').toString().split(',').map(s => s.trim());
+            let certButtonsHTML = '';
+            
+            if (!blocked.includes('1')) {
+              if (rankNum === 1) certButtonsHTML += createCertBtn(`🥇 ${tc('rank1')}`, r.roleKey, r.name, team.teamId, tableData.pdfUrlColI, '1');
+              else if (rankNum === 2) certButtonsHTML += createCertBtn(`🥈 ${tc('rank2')}`, r.roleKey, r.name, team.teamId, tableData.pdfUrlColJ, '1');
+              else if (rankNum === 3) certButtonsHTML += createCertBtn(`🥉 ${tc('rank3')}`, r.roleKey, r.name, team.teamId, tableData.pdfUrlColK, '1');
+            }
+            if (!blocked.includes('2') && team.medal && team.medal !== '-') {
+              let mUrl = tableData.pdfUrl;
+              const lm = team.medal.toLowerCase();
+              if (/🥇|gold|ทอง/.test(lm)) mUrl = tableData.pdfUrlColL;
+              else if (/🥈|silver|เงิน/.test(lm)) mUrl = tableData.pdfUrlColM;
+              else if (/🥉|bronze|ทองแดง/.test(lm)) mUrl = tableData.pdfUrlColN;
+              certButtonsHTML += createCertBtn('🏅 ประกาศนียบัตรเหรียญ', r.roleKey, r.name, team.teamId, mUrl, '2');
+            }
+            if (!blocked.includes('3')) {
+              certButtonsHTML += createCertBtn(`📜 ${tc('join')}`, r.roleKey, r.name, team.teamId, tableData.pdfUrl, '3');
+            }
+            const roleLabelHTML = isCoach 
+              ? `<span class="coach-role-label">👨‍🏫 ${r.label}</span>`
+              : `<span class="member-role-label">${r.label}</span>`;
+            gridCardsHTML += `
+              <div class="${cardClass}">
+                <div>
+                  <div>${roleLabelHTML}</div>
+                  <div class="member-name" title="${r.name}">${r.name}</div>
+                </div>
+                <div class="mt-2">
+                  ${certButtonsHTML || '<div class="text-xs text-slate-400 py-1">ไม่มีรายการสิทธิ์ใบประกาศฯ</div>'}
+                </div>
+              </div>
+            `;
+          });
+          teamCard.innerHTML = `
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-2">
+              <div>
+                <span class="rank-badge ${rankClass} me-2">อันดับที่ ${team.rank}</span>
+                <span class="team-id-badge me-2">
+                  <span class="text-slate-500 font-bold">Team ID:</span>
+                  <span class="text-teal-600 font-extrabold ms-1">${team.teamId}</span>
+                </span>
+                <h3 class="text-lg font-bold text-slate-900 mt-1 mb-0">${team.teamName}</h3>
+                <p class="text-xs text-slate-600 mb-0">${team.institution}</p>
+              </div>
+              
+              <div class="d-flex flex-column align-items-end gap-2">
+                <div class="score-container">
+                  <div class="score-pill"><span class="score-label">${sLabel1}</span><span class="score-val">${team.score1}</span></div>
+                  <div class="score-pill"><span class="score-label">${sLabel2}</span><span class="score-val">${team.score2}</span></div>
+                  <div class="score-pill"><span class="score-label">${sLabel3}</span><span class="score-val">${team.score3}</span></div>
+                </div>
+              </div>
+            </div>
+            <div id="${memberContainerId}" class="member-grid-container" style="display: none;">
+              <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-slate-200">
+                <span class="text-xs font-bold text-slate-600">👥 รายชื่อสมาชิกในทีม</span>
+                <button class="btn-download-zip" 
+                        onclick="downloadTeamZip('${team.teamId}', '${team.teamName}')">
+                  📦 ดาวน์โหลดเกียรติบัตรทั้งหมด (ZIP)
+                </button>
+              </div>
+              <div class="member-grid">
+                ${gridCardsHTML}
+              </div>
+            </div>
+            <button class="toggle-bar-btn" onclick="toggleMemberGrid('${memberContainerId}', this)">
+              <span>${t('showMembersText')}</span>
+            </button>
+          `;
+          compSection.appendChild(teamCard);
+        }
+        container.appendChild(compSection);
+      }
+    }
+
+    async function prepareAndPreview(roleType, personName, teamId, imageUrl, certType, btnEl) {
+      if (!imageUrl || imageUrl.trim() === '' || imageUrl === '-') {
+        Swal.fire('ไม่พบเทมเพลต', 'ยังไม่ได้ตั้งค่าไฟล์เทมเพลตสำหรับรายการนี้', 'warning');
+        return;
+      }
+      showLoadingAlert('กำลังเตรียมเกียรติบัตร...', 'กำลังสร้างเอกสารพรีวิวตัวอย่าง');
+      try {
+        const certData = await callServer('getOrCreateCertId', { teamId, personName, roleType, certType });
+        const b64 = await callServer('getImageBase64', { imageUrl });
+        
+        activeMemberContext = { personName, certificateId: certData.certificateId };
+        globalActiveBase64 = b64;
+        if (btnEl && certData.certificateId) {
+          let idBadge = btnEl.querySelector('.cert-id-badge');
+          if (!idBadge) {
+            idBadge = document.createElement('span');
+            idBadge.className = 'cert-id-badge';
+            btnEl.appendChild(idBadge);
+            let pendingBadge = btnEl.querySelector('.cert-id-pending');
+            if (pendingBadge) pendingBadge.remove();
+          }
+          idBadge.innerText = `[ID: ${certData.certificateId}]`;
+        }
+        document.getElementById('v1ModalImage').src = b64;
+        
+        const nameEl = document.getElementById('v1NameText');
+        nameEl.textContent = personName;
+        nameEl.style.bottom = CERT_CONFIG.name.bottomOffset;
+        nameEl.style.left = CERT_CONFIG.name.leftOffset;
+        nameEl.style.fontSize = `${calcFontSize(personName, CERT_CONFIG.name.baseSize)}px`;
+        const idEl = document.getElementById('v1IdText');
+        idEl.textContent = certData.certificateId;
+        idEl.style.bottom = CERT_CONFIG.certId.bottomOffset;
+        idEl.style.left = CERT_CONFIG.certId.leftOffset;
+        idEl.style.fontSize = `${CERT_CONFIG.certId.baseSize}px`;
+        document.getElementById('zoomSlider').value = 0.5;
+        updateImageZoom(0.5);
+        document.getElementById('v1ImageModal').style.display = 'flex';
+        Swal.close();
+      } catch (e) {
+        Swal.close();
+        Swal.fire('Error', e.message, 'error');
+      }
+    }
+
+    function triggerPDFCompileV1() {
+      if (!globalActiveBase64 || !activeMemberContext) return;
+      showLoadingAlert('กำลังสร้างไฟล์ PDF...', 'กำลังแปลงเอกสารเป็นไฟล์ PDF สำหรับดาวน์โหลด');
+      document.fonts.ready.then(() => {
+        const box = document.getElementById('v1HiddenRenderBox');
+        box.innerHTML = '';
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'position:relative;width:1200px;background:white;';
+        const img = document.createElement('img');
+        img.src = globalActiveBase64;
+        img.style.cssText = 'width:100%;display:block;';
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'cert-overlay-name';
+        nameDiv.textContent = activeMemberContext.personName;
+        nameDiv.style.cssText = `bottom:${CERT_CONFIG.name.bottomOffset};left:${CERT_CONFIG.name.leftOffset};transform:translateX(-50%);width:70%;text-align:center;font-size:${calcFontSize(activeMemberContext.personName, CERT_CONFIG.name.baseSize)}px;font-weight:700;color:#0f766e;`;
+        const idDiv = document.createElement('div');
+        idDiv.className = 'cert-overlay-id';
+        idDiv.textContent = activeMemberContext.certificateId;
+        idDiv.style.cssText = `bottom:${CERT_CONFIG.certId.bottomOffset};left:${CERT_CONFIG.certId.leftOffset};font-size:${CERT_CONFIG.certId.baseSize}px;font-weight:700;color:#1e3530;background:#fff;padding:4px 12px;border-radius:4px;`;
+        wrap.appendChild(img); wrap.appendChild(nameDiv); wrap.appendChild(idDiv);
+        box.appendChild(wrap);
+        img.onload = () => {
+          const nW = img.naturalWidth || 1200, nH = img.naturalHeight || 850;
+          html2canvas(wrap, { scale: 3, useCORS: true }).then(canvas => {
+            const { jsPDF } = window.jspdf;
+            const mmW = nW * 0.264583, mmH = nH * 0.264583;
+            const pdf = new jsPDF({ orientation: nW > nH ? 'l' : 'p', unit: 'mm', format: [mmW, mmH] });
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, mmW, mmH);
+            pdf.save(`${activeMemberContext.personName}_Certificate.pdf`);
+            box.innerHTML = '';
+            Swal.close();
+            Swal.fire('สำเร็จ', 'ดาวน์โหลดใบประกาศนียบัตรเรียบร้อยแล้ว', 'success');
+          });
+        };
+      });
+    }
+
+    async function downloadTeamZip(teamId, teamName) {
+      const containerId = `member-container-${teamId.toString().replace(/[^a-zA-Z0-9]/g, '')}`;
+      const memberContainer = document.getElementById(containerId);
+      if (!memberContainer) return;
+      const buttons = memberContainer.querySelectorAll('.cert-btn-item');
+      if (buttons.length === 0) {
+        Swal.fire('ไม่พบเกียรติบัตร', 'ไม่พบรายการเกียรติบัตรที่ได้รับสิทธิ์ในทีมนี้', 'info');
+        return;
+      }
+      showLoadingAlert('กำลังรวมไฟล์ทั้งหมด (ZIP)...', `กำลังจัดเตรียมเอกสาร ${buttons.length} ใบ`);
+      try {
+        const zip = new JSZip();
+        const { jsPDF } = window.jspdf;
+        for (let btn of buttons) {
+          const onclickAttr = btn.getAttribute('onclick');
+          const matches = onclickAttr.match(/prepareAndPreview\('(.*?)','(.*?)','(.*?)','(.*?)','(.*?)'/);
+          
+          if (matches) {
+            const [_, roleType, personName, tId, imageUrl, certType] = matches;
+            
+            const certData = await callServer('getOrCreateCertId', { teamId: tId, personName, roleType, certType });
+            const b64 = await callServer('getImageBase64', { imageUrl });
+            if (b64) {
+              const box = document.getElementById('v1HiddenRenderBox');
+              box.innerHTML = '';
+              const wrap = document.createElement('div');
+              wrap.style.cssText = 'position:relative;width:1200px;background:white;';
+              const img = document.createElement('img');
+              img.src = b64;
+              img.style.cssText = 'width:100%;display:block;';
+              const nameDiv = document.createElement('div');
+              nameDiv.className = 'cert-overlay-name';
+              nameDiv.textContent = personName;
+              nameDiv.style.cssText = `bottom:${CERT_CONFIG.name.bottomOffset};left:${CERT_CONFIG.name.leftOffset};transform:translateX(-50%);width:70%;text-align:center;font-size:${calcFontSize(personName, CERT_CONFIG.name.baseSize)}px;font-weight:700;color:#0f766e;`;
+              const idDiv = document.createElement('div');
+              idDiv.className = 'cert-overlay-id';
+              idDiv.textContent = certData.certificateId;
+              idDiv.style.cssText = `bottom:${CERT_CONFIG.certId.bottomOffset};left:${CERT_CONFIG.certId.leftOffset};font-size:${CERT_CONFIG.certId.baseSize}px;font-weight:700;color:#1e3530;background:#fff;padding:4px 12px;border-radius:4px;`;
+              wrap.appendChild(img); wrap.appendChild(nameDiv); wrap.appendChild(idDiv);
+              box.appendChild(wrap);
+              await new Promise(r => { img.onload = r; });
+              const canvas = await html2canvas(wrap, { scale: 2, useCORS: true });
+              const nW = img.naturalWidth || 1200, nH = img.naturalHeight || 850;
+              const mmW = nW * 0.264583, mmH = nH * 0.264583;
+              
+              const pdf = new jsPDF({ orientation: nW > nH ? 'l' : 'p', unit: 'mm', format: [mmW, mmH] });
+              pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, mmW, mmH);
+              
+              const pdfBlob = pdf.output('blob');
+              zip.file(`${personName}_${certType}_${certData.certificateId}.pdf`, pdfBlob);
+              box.innerHTML = '';
+            }
+          }
+        }
+        const content = await zip.generateAsync({ type: "blob" });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(content);
+        a.download = `Certificates_Team_${teamId}_${teamName}.zip`;
+        a.click();
+        Swal.close();
+        Swal.fire('สำเร็จ', 'ดาวน์โหลดเกียรติบัตรทั้งหมดเรียบร้อยแล้ว', 'success');
+      } catch (err) {
+        Swal.close();
+        Swal.fire('Error', 'เกิดข้อผิดพลาดในการสร้างไฟล์ ZIP: ' + err.message, 'error');
+      }
+    }
+    function closeV1Preview() {
+      document.getElementById('v1ImageModal').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
