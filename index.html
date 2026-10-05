@@ -339,7 +339,7 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     // URL Web App ล่าสุดจาก Google Apps Script
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzDj_Edmz4fRLlX_2rqGNuH6Ayz57aw-KoGxA0yukAypaZH-jsv6aOwLl2nJRw2A1u-Og/exec";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxDj_Edmz4fRLlX_2rqGNuH6Ayz57aw-KoGxA0yukAypaZH-jsv6aOwLl2nJRw2A1u-Og/exec";
     
     const CERT_CONFIG = {
       name:   { bottomOffset: "68%", leftOffset: "58%", baseSize: 70 },
@@ -363,10 +363,12 @@
         hideMembersText: "ซ่อนรายชื่อสมาชิก ▲",
         showMembersText: "แสดงรายชื่อสมาชิก ▼",
         certTypes: {
-          rank1: "รางวัลชนะเลิศ", rank2: "รองชนะเลิศอันดับ 1", rank3: "รองชนะเลิศอันดับ 2",
-          medalGold: "เหรียญทอง", medalSilver: "เหรียญเงิน", medalBronze: "เหรียญทองแดง",
-          join: "เกียรติบัตรเข้าร่วม"
-        }
+      rank1: "รางวัลชนะเลิศ", rank2: "รองชนะเลิศอันดับ 1", rank3: "รองชนะเลิศอันดับ 2",
+      rank4: "อันดับที่ 4", rank5: "อันดับที่ 5", rank6: "อันดับที่ 6",
+      rank7: "อันดับที่ 7", rank8: "อันดับที่ 8", rank9: "อันดับที่ 9", rank10: "อันดับที่ 10",
+      medalGold: "เหรียญทอง", medalSilver: "เหรียญเงิน", medalBronze: "เหรียญทองแดง",
+      join: "เกียรติบัตรเข้าร่วม"
+    }
       },
       en: {
         title: "Download Certificate",
@@ -379,10 +381,12 @@
         hideMembersText: "Hide Members ▲",
         showMembersText: "Show Members ▼",
         certTypes: {
-          rank1: "Winner", rank2: "1st Runner-up", rank3: "2nd Runner-up",
-          medalGold: "Gold Medal", medalSilver: "Silver Medal", medalBronze: "Bronze Medal",
-          join: "Certificate of Participation"
-        }
+      rank1: "Winner", rank2: "1st Runner-up", rank3: "2nd Runner-up",
+      rank4: "4th Place", rank5: "5th Place", rank6: "6th Place",
+      rank7: "7th Place", rank8: "8th Place", rank9: "9th Place", rank10: "10th Place",
+      medalGold: "Gold Medal", medalSilver: "Silver Medal", medalBronze: "Bronze Medal",
+      join: "Certificate of Participation"
+    }
       }
     };
     function t(key) { return T[currentLang][key] ?? key; }
@@ -577,6 +581,13 @@
               if (rankNum === 1) certButtonsHTML += createCertBtn(`🥇 ${tc('rank1')}`, r.roleKey, r.name, team.teamId, tableData.pdfUrlColI, '1');
               else if (rankNum === 2) certButtonsHTML += createCertBtn(`🥈 ${tc('rank2')}`, r.roleKey, r.name, team.teamId, tableData.pdfUrlColJ, '1');
               else if (rankNum === 3) certButtonsHTML += createCertBtn(`🥉 ${tc('rank3')}`, r.roleKey, r.name, team.teamId, tableData.pdfUrlColK, '1');
+              else if (rankNum === 4) certButtonsHTML += createCertBtn(`🎖️ ${tc('rank4')}`, r.roleKey, r.name, team.teamId, tableData.pdfUrlColO, '1');
+              else if (rankNum === 5) certButtonsHTML += createCertBtn(`🎖️ ${tc('rank5')}`, r.roleKey, r.name, team.teamId, tableData.pdfUrlColP, '1');
+              else if (rankNum === 6) certButtonsHTML += createCertBtn(`🎖️ ${tc('rank6')}`, r.roleKey, r.name, team.teamId, tableData.pdfUrlColQ, '1');
+              else if (rankNum === 7) certButtonsHTML += createCertBtn(`🎖️ ${tc('rank7')}`, r.roleKey, r.name, team.teamId, tableData.pdfUrlColR, '1');
+              else if (rankNum === 8) certButtonsHTML += createCertBtn(`🎖️ ${tc('rank8')}`, r.roleKey, r.name, team.teamId, tableData.pdfUrlColS, '1');
+              else if (rankNum === 9) certButtonsHTML += createCertBtn(`🎖️ ${tc('rank9')}`, r.roleKey, r.name, team.teamId, tableData.pdfUrlColT, '1');
+              else if (rankNum === 10) certButtonsHTML += createCertBtn(`🎖️ ${tc('rank10')}`, r.roleKey, r.name, team.teamId, tableData.pdfUrlColU, '1');
             }
             if (!blocked.includes('2') && team.medal && team.medal !== '-') {
               let mUrl = tableData.pdfUrl;
